@@ -256,4 +256,38 @@ GET sample-1/_settings
   }
 ```
 
+# Backup restore of a index
 
+```json
+PUT _snapshot/my_repo
+{
+  "type":"fs",
+  "settings": {
+    "location": "/home/elastic/snaphost"
+  }
+}
+
+PUT _snapshot/my_repo/bank-1?wait_for_completion=true
+{
+  "indices": "bank"
+}
+
+DELETE bank
+
+POST _snapshot/my_repo/bank-1/_restore
+{
+  "indices":"bank"
+}
+```
+
+- You can even restore  and rename at the same time
+
+```json
+POST _snapshot/my_repo/bank-2/_restore
+{
+  "indices":"accounts_*",
+  "rename_pattern": "(.+)",
+  "rename_replacement": "restored_$1"
+}
+
+```
