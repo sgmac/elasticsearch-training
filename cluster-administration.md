@@ -258,6 +258,9 @@ GET sample-1/_settings
 
 # Backup restore of a index
 
+
+- You need to edit the `elasticsearch.yaml`, configuration and  add `path.repo` and restart the service. Do not forget to create the directory.
+
 ```json
 PUT _snapshot/my_repo
 {
@@ -291,3 +294,69 @@ POST _snapshot/my_repo/bank-2/_restore
 }
 
 ```
+
+# Configure a node for warm/hot architecture
+
+
+```
+GET _cat/nodeattrs?v
+
+
+# hot: most relevant data
+PUT recent_logs
+{
+  "settings": {
+    "number_of_replicas": 0,
+    "number_of_shards": 1
+  }
+}
+
+# warm
+PUT old_logs
+{
+  "settings": {
+    "number_of_replicas": 0,
+    "number_of_shards": 1
+  }
+}
+
+GET _cat/shards/*_logs?v
+index       shard prirep state   docs store ip             node
+old_logs    0     p      STARTED    0  230b 172.31.125.109 data-2
+recent_logs 0     p      STARTED    0  230b 172.31.117.146 data-1
+
+
+
+GET _cluster/allocation/explain
+{
+  "index": "old_logs",
+  "shard": 0,
+  "primary": true
+}
+
+```
+
+# Configure a cluster for cross-search cluster
+
+
+- Only thing to keep in mind is the subnet of the remote cluster and using the transport port 9300.
+```
+PUT _cluster/settings
+{
+  "persistent" : {
+    "cluster": {
+      "remote":{ 
+        "c2": {
+         "seeds":["172.31.125.156:9300"]
+        }
+      }
+    }
+  }
+}
+```
+
+- Now the notation to allow search in different clusters is just  `c2:index_name/_search` but if you want to search in the current cluster and the second one. Use the search below.
+
+
+`GET bank,c2:accounts_female,c2:accounts_male/_search?size=0`
+
