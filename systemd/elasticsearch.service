@@ -1,0 +1,16 @@
+[Unit]
+Description=Elastisearch
+After=network.target
+
+[Service]
+Type=simple
+User=elastic
+Group=elastic
+LimitNOFILE=65536
+SuccessExitStatus=143
+ExecStart=/home/elastic/elasticsearch/bin/elasticsearch -p pid
+ExecStop=/usr/bin/pkill -F /home/elastic/elasticsearch/pid
+
+
+[Install]
+WantedBy=multi-user.target
