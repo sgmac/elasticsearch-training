@@ -98,7 +98,7 @@ elasticsearch/bin/elasticsearch-keystore  add xpack.security.http.ssl.truststore
 
 # Roles and users
 
-- Below is an exmaple to create or update a role, is the same.
+- Below is an exmaple to create or update a role, is the same. This requires to enable `xpack.security.enabled`
 ```
 POST _security/role/sample
 {
